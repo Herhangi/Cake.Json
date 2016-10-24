@@ -4,6 +4,8 @@ packages/
 Components/
 tools/
 nupkg/
+*.lock.json
+*.xproj.user
 *.userprefs
 *.suo
 .nugetapikey

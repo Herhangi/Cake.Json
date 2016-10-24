@@ -1,8 +1,9 @@
 ﻿using System;
 using Cake.Core.IO;
 using Cake.Core;
-using System.Collections.Generic;
+using Cake.Core.Tooling;
 using Cake.Testing;
+using Microsoft.DotNet.InternalAbstractions;
 
 namespace Cake.Json.Tests
 {
@@ -17,18 +18,23 @@ namespace Cake.Json.Tests
         {
             testsDir = new DirectoryPath (
                 System.IO.Path.GetFullPath(
-                    System.IO.Path.Combine (AppDomain.CurrentDomain.BaseDirectory, "../../")));
+                    System.IO.Path.Combine (ApplicationEnvironment.ApplicationBasePath, "../../../")));
 
-            var environment = Cake.Testing.FakeEnvironment.CreateUnixEnvironment (false);
+            var environment = FakeEnvironment.CreateUnixEnvironment (false);
 
-            var fileSystem = new Cake.Testing.FakeFileSystem (environment);
+            var fileSystem = new FakeFileSystem (environment);
             var globber = new Globber (fileSystem, environment);
-            log = new Cake.Testing.FakeLog ();
+            log = new FakeLog ();
             var args = new FakeCakeArguments ();
             var processRunner = new ProcessRunner (environment, log);
             var registry = new WindowsRegistry ();
+            var configuration = new FakeConfiguration();
 
-            context = new CakeContext (fileSystem, environment, globber, log, args, processRunner, registry);
+            var toolRepository = new ToolRepository(environment);
+            var toolResolutionStrategy = new ToolResolutionStrategy(fileSystem, environment, globber, configuration);
+            var toolLocator = new ToolLocator(environment, toolRepository, toolResolutionStrategy);
+
+            context = new CakeContext (fileSystem, environment, globber, log, args, processRunner, registry, toolLocator);
             context.Environment.WorkingDirectory = testsDir;
         }
 
